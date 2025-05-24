@@ -1,0 +1,230 @@
+/* In src/App.css or a new categories.css imported into MenuCategories.jsx */
+.categories-nav {
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+}
+.categories-nav h2 {
+  margin-top: 0;
+}
+.categories-nav ul {
+  list-style: none;
+  padding: 0;
+  display: flex; /* For horizontal layout */
+  flex-wrap: wrap; /* Allow wrapping */
+  gap: 10px; /* Space between buttons */
+}
+.categories-nav button {
+  padding: 8px 15px;
+  background-color: #e7e7e7;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1em;
+}
+.categories-nav button:hover {
+  background-color: #d7d7d7;
+}
+
+
+
+/* src/App.css or a new menu-items.css */
+.menu-items-container {
+    margin-top: 20px;
+}
+
+.menu-items-list {
+    list-style: none;
+    padding: 0;
+    display: grid; /* Using grid for a nice layout */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Responsive columns */
+    gap: 20px;
+}
+
+.menu-item {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column; /* Stack content vertically */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.menu-item-image {
+    width: 100%;
+    max-height: 180px;
+    object-fit: cover;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.menu-item-details {
+    flex-grow: 1; /* Allow details to take up available space */
+}
+
+.menu-item h3 {
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-size: 1.2em;
+    color: #333;
+}
+
+.item-description {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 10px;
+    flex-grow: 1; /* Allow description to take up space */
+}
+
+.item-price {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #007bff; /* A nice blue for price */
+    margin-bottom: 15px;
+}
+
+.add-to-order-btn {
+    background-color: #28a745; /* Green */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 1em;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.add-to-order-btn:hover {
+    background-color: #218838;
+}
+
+.loading-text, .error-text {
+    text-align: center;
+    font-size: 1.1em;
+    padding: 20px;
+}
+
+
+/* src/App.css */
+
+/* ... other styles ... */
+
+.main-content {
+  display: flex; /* For side-by-side menu and cart */
+  gap: 20px;
+}
+
+.menu-section {
+  flex: 3; /* Menu takes more space */
+}
+
+.cart-sidebar {
+  flex: 1; /* Cart takes less space */
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  align-self: flex-start; /* Prevent cart from stretching full height if menu is long */
+  min-width: 250px; /* Ensure cart has a minimum width */
+}
+
+.cart-sidebar h2 {
+  margin-top: 0;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.cart-sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.cart-item-summary {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px dashed #eee;
+  font-size: 0.95em;
+}
+
+.cart-item-summary:last-child {
+  border-bottom: none;
+}
+
+.cart-total-final {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 2px solid #333;
+  font-size: 1.2em;
+  text-align: right;
+}
+
+.cart-header-summary {
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
+.cart-item-options-display {
+    list-style: none;
+    padding-left: 15px; /* Indent options slightly */
+    margin-top: 5px;
+    font-size: 0.85em;
+    color: #555;
+}
+
+.cart-item-options-display li {
+    padding: 2px 0;
+}
+
+
+/* src/App.css */
+/* ... existing styles ... */
+
+.message {
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    font-size: 0.95em;
+    text-align: center;
+}
+
+.error-message {
+    background-color: #f8d7da; /* Light red */
+    color: #721c24; /* Dark red */
+    border: 1px solid #f5c6cb;
+}
+
+.success-message {
+    background-color: #d4edda; /* Light green */
+    color: #155724; /* Dark green */
+    border: 1px solid #c3e6cb;
+}
+
+.submit-order-btn {
+    background-color: #007bff; /* Blue */
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 1.1em;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%; /* Make button full width of its container */
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.submit-order-btn:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.submit-order-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
