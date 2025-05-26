@@ -11,6 +11,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-width: 100%;
 }
 
 .admin-app-header {
@@ -24,10 +25,9 @@ body {
 
 .admin-app-container main {
   flex-grow: 1;
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
+  padding: 20px; /* You can adjust or remove padding if you want content edge-to-edge */
+  width: 100%; /* Ensures it tries to take full width */
+  box-sizing: border-box; /* Ensures padding doesn't add to the total width beyond 100% */
 }
 
 .admin-app-footer {
@@ -46,8 +46,10 @@ body {
 }
 
 .orders-filter {
-  margin-bottom: 20px;
-  padding: 10px;
+  display: flex; /* Arrange label and select horizontally */
+  align-items: center; /* Vertically align items */
+  margin-bottom: 25px; /* Increased margin */
+  padding: 15px; /* Increased padding */
   background-color: #f8f9fa;
   border-radius: 5px;
   border: 1px solid #dee2e6;
@@ -55,11 +57,13 @@ body {
 .orders-filter label {
   margin-right: 10px;
   font-weight: bold;
+  margin-right: 15px;
 }
 .orders-filter select {
-  padding: 8px;
   border-radius: 4px;
   border: 1px solid #ced4da;
+  padding: 10px; /* Larger select box */
+  min-width: 200px; /* Give select more width */
 }
 
 
@@ -175,7 +179,7 @@ body {
 .user-info {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 20px;
     font-size: 0.9em;
 }
 
@@ -195,4 +199,35 @@ body {
 }
 .logout-btn:hover {
     background-color: #c0392b; /* Darker red */
+}
+
+/* frontend-admin/src/App.css */
+/* ... existing styles ... */
+
+.admin-nav {
+    display: inline-flex; /* Changed from flex to inline-flex to sit alongside other items better */
+    gap: 10px;
+    margin: 0 20px; /* Add some margin */
+}
+
+.admin-nav button {
+    background-color: transparent;
+    color: #ecf0f1; /* Light text to match user info */
+    border: 1px solid transparent; /* No border initially */
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.admin-nav button:hover {
+    background-color: rgba(236, 240, 241, 0.1); /* Slight hover effect */
+    border-color: rgba(236, 240, 241, 0.3);
+}
+
+.admin-nav button.active {
+    background-color: #3498db; /* A highlight color for active tab */
+    border-color: #2980b9;
+    color: white;
 }

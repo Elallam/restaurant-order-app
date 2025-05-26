@@ -1,7 +1,8 @@
 // frontend-admin/src/components/OrdersDashboard.jsx
-import { useState, useEffect, useCallback } from 'react'; // Added useCallback
+import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
-import { useAuth } from '../context/AuthContext'; // Import useAuth
+import { useAuth } from '../context/AuthContext';
+import io from 'socket.io-client'; // Import socket.io-client
 
 // Helper to format currency
 const formatCurrency = (amount) => {
@@ -10,49 +11,49 @@ const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(numericAmount);
 };
 
+const BACKEND_URL = 'http://localhost:3001'; // Define your backend URL
+
 function OrdersDashboard() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
     const [filterStatus, setFilterStatus] = useState('');
+    const [socket, setSocket] = useState(null); // State for the socket instance
 
-    const { getToken, logout, authState } = useAuth(); // Get getToken and logout from AuthContext
+    const { getToken, logout, authState } = useAuth();
 
-    const fetchOrders = useCallback(async () => {
+    const fetchOrders = useCallback(async (currentAuthToken) => {
         setLoading(true);
         setError(null);
-        let url = 'http://localhost:3001/api/orders';
+        let url = `${BACKEND_URL}/api/orders`;
         if (filterStatus) {
             url += `?status=${filterStatus}`;
         }
 
-        const token = getToken(); // Get the token
-        if (!token) {
-            setError("Authentication token not found. Please log in again.");
+        if (!currentAuthToken) {
+            setError("Authentication token not found for initial fetch.");
             setLoading(false);
-            // Optionally logout or redirect to login
-            // logout();
             return;
         }
 
         try {
             const response = await fetch(url, {
                 headers: {
-                    'Authorization': `Bearer ${token}`, // Add Authorization header
-                    'Content-Type': 'application/json' // Good practice, though not always needed for GET
+                    'Authorization': `Bearer ${currentAuthToken}`,
+                    'Content-Type': 'application/json'
                 }
             });
 
             if (!response.ok) {
                 const errData = await response.json().catch(() => ({ message: `HTTP error! status: ${response.status}` }));
-                if (response.status === 401 || response.status === 403) { // Unauthorized or Forbidden
+                if (response.status === 401 || response.status === 403) {
                     setError(`Authentication error: ${errData.message}. Please log in again.`);
-                    logout(); // Log out user if token is invalid/expired
+                    logout();
                 } else {
                     throw new Error(errData.message || `HTTP error! status: ${response.status}`);
                 }
-                return; // Stop further execution in case of error
+                return;
             }
             const data = await response.json();
             setOrders(data);
@@ -62,19 +63,85 @@ function OrdersDashboard() {
         } finally {
             setLoading(false);
         }
-    }, [filterStatus, getToken, logout]); // Dependencies for useCallback
+    }, [filterStatus, logout]); // Removed getToken from here as token passed as arg
 
+    // Effect for initial data fetching
     useEffect(() => {
-        if (authState.isAuthenticated) { // Only fetch if authenticated
-            fetchOrders();
-            // Optional: Set up polling to refresh orders periodically
-            const intervalId = setInterval(fetchOrders, 30000); // Refresh every 30 seconds
-            return () => clearInterval(intervalId); // Cleanup interval on component unmount
+        if (authState.isAuthenticated) {
+            const currentToken = getToken(); // Get token once
+            fetchOrders(currentToken);
         } else {
-            setOrders([]); // Clear orders if not authenticated
+            setOrders([]);
             setLoading(false);
         }
-    }, [fetchOrders, authState.isAuthenticated]); // Dependency on fetchOrders and isAuthenticated
+    }, [authState.isAuthenticated, fetchOrders, getToken]);
+
+
+    // Effect for Socket.IO connection and event listeners
+    useEffect(() => {
+        if (!authState.isAuthenticated) {
+            // If not authenticated, ensure no socket connection is active
+            if (socket) {
+                socket.disconnect();
+                setSocket(null);
+            }
+            return;
+        }
+
+        // Connect to Socket.IO server
+        // You can pass auth token here if your backend socket auth is set up:
+        // const newSocket = io(BACKEND_URL, { auth: { token: getToken() } });
+        const newSocket = io(BACKEND_URL);
+        setSocket(newSocket);
+        console.log('Attempting to connect to Socket.IO server...');
+
+        newSocket.on('connect', () => {
+            console.log('Socket.IO connected successfully:', newSocket.id);
+        });
+
+        newSocket.on('connect_error', (err) => {
+            console.error('Socket.IO connection error:', err.message);
+            setError(`Socket connection failed: ${err.message}. Real-time updates may not work.`);
+        });
+
+        newSocket.on('newOrder', (newOrder) => {
+            console.log('Received newOrder event:', newOrder);
+            setOrders(prevOrders => {
+                // Avoid adding duplicate if it somehow already exists
+                if (prevOrders.find(o => o.order_id === newOrder.order_id)) {
+                    return prevOrders.map(o => o.order_id === newOrder.order_id ? newOrder : o);
+                }
+                return [newOrder, ...prevOrders].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // Add to top and sort
+            });
+             // Optionally, update the modal if the new order is being viewed (less likely for newOrder)
+            if (selectedOrderDetails && selectedOrderDetails.order_id === newOrder.order_id) {
+                setSelectedOrderDetails(newOrder);
+            }
+        });
+
+        newSocket.on('orderStatusUpdate', (updatedOrder) => {
+            console.log('Received orderStatusUpdate event:', updatedOrder);
+            setOrders(prevOrders =>
+                prevOrders.map(order =>
+                    order.order_id === updatedOrder.order_id ? updatedOrder : order
+                ).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) // Re-sort if needed
+            );
+            // If the updated order is the one being viewed in the modal, update its details
+            if (selectedOrderDetails && selectedOrderDetails.order_id === updatedOrder.order_id) {
+                setSelectedOrderDetails(updatedOrder);
+            }
+        });
+
+        // Cleanup on component unmount or when auth changes
+        return () => {
+            console.log('Disconnecting Socket.IO...');
+            newSocket.disconnect();
+            setSocket(null);
+        };
+    }, [authState.isAuthenticated]); // Only re-run if isAuthenticated changes (for connect/disconnect)
+                                     // Listeners inside will use the latest state due to how React state works in closures
+                                     // or we can add selectedOrderDetails if needed as dependency if its update logic is complex
+
 
     const handleViewDetails = (order) => {
         setSelectedOrderDetails(order);
@@ -87,12 +154,21 @@ function OrdersDashboard() {
             logout();
             return;
         }
+        // Optimistic UI update (optional, can make UI feel faster)
+        // setOrders(prevOrders =>
+        //     prevOrders.map(order =>
+        //         order.order_id === orderId ? { ...order, status: newStatus } : order
+        //     )
+        // );
+        // if (selectedOrderDetails && selectedOrderDetails.order_id === orderId) {
+        //     setSelectedOrderDetails(prev => ({ ...prev, status: newStatus }));
+        // }
 
         try {
-            const response = await fetch(`http://localhost:3001/api/orders/${orderId}/status`, {
+            const response = await fetch(`${BACKEND_URL}/api/orders/${orderId}/status`, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `Bearer ${token}`, // Add Authorization header
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ status: newStatus }),
@@ -100,6 +176,8 @@ function OrdersDashboard() {
 
             if (!response.ok) {
                 const errData = await response.json().catch(() => ({ message: `Failed to update status. Status: ${response.status}` }));
+                 // Revert optimistic update if API call fails
+                // fetchOrders(token); // Or revert manually
                 if (response.status === 401 || response.status === 403) {
                     setError(`Authentication error: ${errData.message}. Please log in again.`);
                     logout();
@@ -108,23 +186,17 @@ function OrdersDashboard() {
                 }
                 return;
             }
-            // Refresh orders list to show updated status
-            fetchOrders();
-            // If the updated order was the one being viewed in the modal, update its status too
-            if (selectedOrderDetails && selectedOrderDetails.order_id === orderId) {
-                setSelectedOrderDetails(prev => ({ ...prev, status: newStatus }));
-            }
+            // No need to call fetchOrders() here if socket event handles the update
+            // The backend will emit 'orderStatusUpdate' which will be caught by the socket listener
+            console.log(`Status update for order ${orderId} sent successfully. Waiting for socket event.`);
         } catch (err) {
             console.error("Error updating order status:", err);
             alert(`Error: ${err.message}`);
-            // setError could be used here too for a less intrusive error message
+            // fetchOrders(token); // Re-fetch to get consistent state if update failed badly
         }
     };
 
-    // If not authenticated, don't render the dashboard contents (App.jsx handles showing Login)
     if (!authState.isAuthenticated && !loading) {
-         // This component shouldn't normally be rendered if not authenticated due to App.jsx logic,
-         // but this is an extra safeguard.
         return <p>Please log in to view the dashboard.</p>;
     }
 
@@ -139,8 +211,12 @@ function OrdersDashboard() {
                 <select
                     id="statusFilter"
                     value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
+                    onChange={(e) => {
+                        setFilterStatus(e.target.value);
+                        // Initial fetch will be triggered by useEffect dependency change on fetchOrders -> filterStatus
+                    }}
                 >
+                    {/* ... options ... */}
                     <option value="">All</option>
                     <option value="pending_approval">Pending Approval</option>
                     <option value="approved">Approved</option>
@@ -149,12 +225,15 @@ function OrdersDashboard() {
                     <option value="completed">Completed</option>
                     <option value="cancelled">Cancelled</option>
                 </select>
-                <button onClick={fetchOrders} style={{marginLeft: '10px'}}>Refresh Orders</button>
+                <button onClick={() => fetchOrders(getToken())} style={{marginLeft: '10px'}} disabled={loading}>
+                    {loading && orders.length > 0 ? 'Refreshing...' : 'Refresh Orders'}
+                </button>
             </div>
 
             {orders.length === 0 && !loading && !error && <p>No orders found{filterStatus ? ` with status: ${filterStatus}` : ''}.</p>}
 
             <div className="orders-list-container">
+                {/* ... mapping orders ... (same as before) */}
                 {orders.map(order => (
                     <div key={order.order_id} className={`order-card status-${order.status.replace('_', '-')}`}>
                         <h3>Order ID: {order.order_id} (Table: {order.table_number})</h3>
@@ -184,7 +263,8 @@ function OrdersDashboard() {
             </div>
 
             {selectedOrderDetails && (
-                <div className="order-details-modal-overlay" onClick={() => setSelectedOrderDetails(null)}>
+                // ... modal JSX (same as before, it will use updated selectedOrderDetails state) ...
+                 <div className="order-details-modal-overlay" onClick={() => setSelectedOrderDetails(null)}>
                     <div className="order-details-modal-content" onClick={(e) => e.stopPropagation()}>
                         <h2>Order Details (ID: {selectedOrderDetails.order_id})</h2>
                         <p><strong>Table:</strong> {selectedOrderDetails.table_number}</p>
@@ -195,7 +275,7 @@ function OrdersDashboard() {
                         <h4>Items:</h4>
                         {selectedOrderDetails.items && selectedOrderDetails.items.length > 0 ? (
                             <ul>
-                                {selectedOrderDetails.items.map((item, index) => ( // Added index for key if order_item_id isn't always unique/present
+                                {selectedOrderDetails.items.map((item, index) => (
                                     <li key={item.order_item_id || index}>
                                         {item.item_name || 'N/A'} (x{item.quantity}) - {formatCurrency(item.sub_total)}
                                         {item.chosen_options && item.chosen_options.length > 0 && (

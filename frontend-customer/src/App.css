@@ -11,20 +11,46 @@
 .categories-nav ul {
   list-style: none;
   padding: 0;
-  display: flex; /* For horizontal layout */
-  flex-wrap: wrap; /* Allow wrapping */
-  gap: 10px; /* Space between buttons */
+  display: flex;
+  overflow-x: auto; /* Allow horizontal scrolling if too many categories */
+  flex-wrap: nowrap; /* Prevent wrapping if scrolling is preferred */
+  gap: 10px;
+  padding-bottom: 10px; /* Space for scrollbar if it appears */
 }
+
 .categories-nav button {
-  padding: 8px 15px;
+  padding: 10px 15px;
   background-color: #e7e7e7;
   border: 1px solid #ddd;
   border-radius: 4px;
   cursor: pointer;
   font-size: 1em;
 }
+
+@media (min-width: 768px) {
+    .categories-nav ul {
+        flex-wrap: wrap; /* Allow wrapping on larger screens */
+        overflow-x: visible;
+    }
+}
+
 .categories-nav button:hover {
   background-color: #d7d7d7;
+}
+
+.container {
+  width: 100%; /* Use full width */
+  max-width: 100%; /* Override desktop max-width for mobile */
+  padding: 10px; /* Adjust padding for mobile */
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 800px; /* Restore max-width for larger screens */
+    padding: 20px;
+    margin: 0 auto;
+  }
 }
 
 
@@ -39,7 +65,15 @@
     padding: 0;
     display: grid; /* Using grid for a nice layout */
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Responsive columns */
-    gap: 20px;
+    /* gap: 20px; */
+    grid-template-columns: 1fr; /* Single column by default for mobile */
+    gap: 15px; /* Adjust gap for mobile */
+}
+
+@media (min-width: 576px) { /* Small tablets and up */
+  .menu-items-list {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
 }
 
 .menu-item {
@@ -115,8 +149,23 @@
 /* ... other styles ... */
 
 .main-content {
-  display: flex; /* For side-by-side menu and cart */
+  display: flex;
+  flex-direction: column; /* Stack vertically by default */
   gap: 20px;
+}
+
+@media (min-width: 768px) { /* Apply for tablets and desktops */
+  .main-content {
+    flex-direction: row; /* Side-by-side for larger screens */
+  }
+  .menu-section {
+    flex: 3;
+  }
+  .cart-sidebar {
+    flex: 1;
+    align-self: flex-start;
+    min-width: 250px;
+  }
 }
 
 .menu-section {
@@ -124,13 +173,12 @@
 }
 
 .cart-sidebar {
-  flex: 1; /* Cart takes less space */
+  width: 95%; /* Full width on mobile */
   background-color: #f9f9f9;
   padding: 15px;
   border-radius: 8px;
   border: 1px solid #e0e0e0;
-  align-self: flex-start; /* Prevent cart from stretching full height if menu is long */
-  min-width: 250px; /* Ensure cart has a minimum width */
+  align-self: flex-start; 
 }
 
 .cart-sidebar h2 {

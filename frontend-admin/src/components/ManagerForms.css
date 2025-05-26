@@ -1,0 +1,161 @@
+/* frontend-admin/src/components/ManagerForms.css */
+.manager-container {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+.manager-container h4 {
+    color: #34495e;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.manager-form {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    border: 1px solid #e0e0e0;
+    margin-bottom: 25px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #555;
+    font-size: 0.9em;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="url"],
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 0.95em;
+}
+.form-group textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+    border-color: #3498db; /* Blue focus */
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.form-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.submit-btn, .edit-btn, .delete-btn, .cancel-btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: opacity 0.2s ease;
+}
+.submit-btn:hover:not(:disabled), .edit-btn:hover:not(:disabled),
+.delete-btn:hover:not(:disabled), .cancel-btn:hover:not(:disabled) {
+    opacity: 0.85;
+}
+.submit-btn:disabled, .edit-btn:disabled, .delete-btn:disabled, .cancel-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
+.submit-btn { background-color: #2ecc71; color: white; } /* Green */
+.edit-btn { background-color: #3498db; color: white; } /* Blue */
+.delete-btn { background-color: #e74c3c; color: white; } /* Red */
+.cancel-btn { background-color: #95a5a6; color: white; } /* Gray */
+
+.form-divider {
+    margin-top: 30px;
+    margin-bottom: 20px;
+    border: 0;
+    border-top: 1px solid #e0e0e0;
+}
+
+.manager-list {
+    list-style: none;
+    padding: 0;
+}
+
+.manager-list-item {
+    background-color: #fff;
+    border: 1px solid #e7e7e7;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.manager-list-item p {
+    font-size: 0.9em;
+    color: #666;
+    margin: 4px 0 0 0;
+}
+.manager-list-item strong {
+    color: #333;
+}
+
+.item-actions button {
+    margin-left: 8px;
+}
+
+.form-error, .error-message.form-error { /* For errors within the form specifically */
+    font-size: 0.9em;
+    margin-bottom: 15px; /* Ensure space below error */
+    padding: 8px;
+}
+/* General error message styling is in App.css or similar */    
+
+/* frontend-admin/src/components/ManagerForms.css */
+/* ... existing styles ... */
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: normal; /* Override default label bolding if needed */
+}
+.checkbox-label input[type="checkbox"] {
+    width: auto; /* Override full width for checkbox */
+}
+
+.manager-list-item .item-main-info {
+    flex-grow: 1;
+}
+.manager-list-item .item-category,
+.manager-list-item .item-price,
+.manager-list-item .item-availability,
+.manager-list-item .item-description-small {
+    font-size: 0.85em;
+    color: #555;
+    margin: 3px 0;
+    display: block; /* Ensure they stack nicely */
+}
+.manager-list-item .item-description-small {
+    color: #777;
+}
+
+.options-btn {
+    background-color: #f39c12; /* Orange */
+    color: white;
+}

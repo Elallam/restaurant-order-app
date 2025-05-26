@@ -1,4 +1,3 @@
-// backend/src/app.js
 const express = require('express');
 const cors = require('cors');
 const path = require('path'); // Ensure path is required if you use it for static files
@@ -21,10 +20,12 @@ app.use(cors(corsOptions));
 // --- End CORS Configuration ---
 
 
+// app.use('/public', express.static(path.join(__dirname, 'uploads')));
 app.use(express.json());
 
 // Static file serving (if you have images/uploads)
-// Example: app.use('/images', express.static(path.join(__dirname, '..', 'public', 'images')));
+// Example: 
+app.use('/images', express.static(path.join(__dirname, '..', 'public', 'images')));
 
 
 // Basic route

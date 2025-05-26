@@ -108,7 +108,7 @@ function MenuItemsList({ selectedCategoryId, onOpenItemOptionsModal, onAddSimple
                                 />
                             )}
                             <div className="menu-item-details">
-                                <h3>{item.name}</h3>
+                                <h3>{item.name} + {item.image_url}</h3>
                                 <p className="item-description">{item.description}</p>
                                 <p className="item-price">{formatCurrency(item.base_price)}</p>
                             </div>
